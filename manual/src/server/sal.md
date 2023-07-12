@@ -88,18 +88,18 @@ func (c *Client) GetK8SCluster(args tfgridBase.GetK8SCluster) (tfgridBase.K8sClu
 func (c *Client) CancelK8SCluster(name string) error 
 ```
 
-### ExtendK8S
+### AddWorkerToK8sCluster
 - Extend the K8S cluster with an extra worker
 - Provide what you need to add the worker (node id, farm id, etc)
 
 ```
-func (c *Client) ExtendK8SCluster(args tfgridBase.ExtendK8S) (tfgridBase.K8sCluster, error) 
+func (c *Client) AddWorkerToK8sCluster(args tfgridBase.AddWorkerToK8sCluster) (tfgridBase.K8sCluster, error) 
 ```
 
-### ShrinkK8S
+### RemoveWorkerFromK8sCluster
 
 ```
-func (c *Client) ShrinkK8SCluster(args tfgridBase.ShrinkK8S) (tfgridBase.K8sCluster, error)
+func (c *Client) RemoveWorkerFromK8sCluster(args tfgridBase.RemoveWorkerFromK8sCluster) (tfgridBase.K8sCluster, error)
 ```
 
 ### DeployZDB
@@ -337,6 +337,13 @@ func (c *Client) Address() (string, error)
 func (c *Client) Transactions(args Transactions) ([]horizon.Transaction, error)
 ```
 
+### Height
+- Height of the chain for the connected rpc remote
+
+```
+func (c *Client) Height() (uint64, error)
+```
+
 ### AccountData
 - Get data related to a stellar account, leave account empty for account data of loaded account
 
@@ -361,9 +368,15 @@ func (c *Client) Transfer(args Transfer) (string, error)
 ### Balance
 - Get the balance of a specific address
 - If address is empty the balance of the loaded account will be returned
+- You can ask the balance of different assets (tft, xlm), default will be xlm
 
 ```
-func (c *Client) Balance(address string) (string, error)
+Balance struct {
+	Address    string `json:"address"`
+	Asset      string `json:"asset"`
+}
+
+func (c *Client) Balance(args Balance) (string, error)
 ```
 
 ### BridgeToEth
@@ -384,7 +397,13 @@ func (c *Client) BridgeToTfchain(args TfchainBridgeTransfer) (string, error)
 - Await till a transaction is processed on ethereum bridge that contains a specific memo, that transaction is the result of a bridge from ethereum to the loaded stellar account
 
 ```
-func (c *Client) AwaitTransactionOnEthBridge(memo string) error
+AwaitBridgedFromEthereum struct {
+    Memo                        string `json:"memo"` // the memo to look for 
+    Timeout                     int    `json:"timeout"` // the timeout after which we abandon the search 
+    AmountOfTransactionsToCheck int    `json:"history_size"`  // how many transactions we check in one go
+}   
+
+func (c *Client) AwaitBridgedFromEthereum(args AwaitBridgedFromEthereum) error
 ```
 
 ## Ethereum
@@ -448,18 +467,18 @@ func (c *Client) TransferEthTft(args TftEthTransfer) (string, error)
 func (c *Client) BridgeToStellar(args TftEthTransfer) (string, error)
 ```
 
-### ApproveEthTftSpending
+### ApproveTftSpending
 - approves the given amount of TFT to be swapped
 
 ```
-func (c *Client) ApproveEthTftSpending(amount string) (string, error)
+func (c *Client) ApproveTftSpending(amount string) (string, error)
 ```
 
-### EthTftSpendingAllowance
+### TftSpendingAllowance
 - returns the amount of TFT approved to be swapped
 
 ```
-func (c *Client) EthTftSpendingAllowance() (string, error)
+func (c *Client) TftSpendingAllowance() (string, error)
 ```
 
 ### Address
@@ -596,7 +615,7 @@ func (c *Client) ApproveHash(args ApproveHash) (string, error)
 ```
 
 ### IsApproved
-- approves a transaction hash
+- checks if a transaction hash was approved
 
 ```
 func (c *Client) IsApproved(args ApproveHash) (bool, error)
@@ -640,18 +659,18 @@ func (c *Client) GetId() (string, error)
 func (c *Client) GetPublicKey() (string, error)
 ```
 
-### ConnectAuthRelay
+### ConnectToAuthRelay
 - connects to an authenticated relay with a given url
 
 ```
-func (c *Client) ConnectAuthRelay(url string) error
+func (c *Client) ConnectToAuthRelay(url string) error
 ```
 
-### ConnectRelay
+### ConnectToRelay
 - connects to a relay with a given url
 
 ```
-func (c *Client) ConnectRelay(url string) error
+func (c *Client) ConnectToRelay(url string) error
 ```
 
 ### GenerateKeyPair
